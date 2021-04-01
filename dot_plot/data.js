@@ -1,0 +1,1 @@
+let plotData = "GrLivArea,SalePrice\n1710,208500\n1262,181500\n1786,223500\n"

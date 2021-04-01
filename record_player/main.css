@@ -1,0 +1,70 @@
+.no-svg-border svg{
+	border: none;
+}
+#save-btn {
+	cursor: pointer;
+	display: inline-block;
+}
+
+#break-screen{
+	position: absolute;
+    margin: 20px;
+    border: black solid 3px;
+    border-radius: 5px;
+    padding: 10px;
+    display: inline-block;
+}
+/*.clickable:hover {
+	cursor: pointer;
+}*/
+.unclickable{
+	pointer-events: none;
+	display: none;
+}
+.clickable{
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+.highTFIDF {
+	fill: #cfcfcf;
+	fill-opacity: 0.5 !important;
+}
+
+.user-selected {
+	stroke-width: 5px !important;
+	stroke: #aeeafc !important;
+	/*fill-opacity: 0.5 !important;*/
+}
+
+.fake-highTFIDF{
+	fill: #dfdfdf;
+	fill-opacity: 0.5 !important;
+}
+
+.srv-txt{
+	display: block;
+}
+
+.hidden{
+	visibility: hidden;
+}
+
+rect {
+	pointer-events: none;
+}
+
+svg {
+	border-style: solid;
+  	border-color: #f2f2f2;
+  	border-width: 5px;
+}
+
+.overlay {
+	position: absolute;
+	width: 6px;
+	height: 6px;
+	background: red;
+	border-radius: 50%
+
+}
