@@ -1,6 +1,6 @@
 "use strict";
 
-
+// min / max projected coordinates of the OH outline
 let heatmapSketch = {
 	xMin : -124.54294774946788,   
 	xMax : 103.72491858742902,
@@ -37,13 +37,18 @@ let treatmentSample,
     correctCount 	=       0,
     mistakeCount 	=       0,
 
-    mapsToShow		=		5,
+    mapsToShow		=		[], // array holding treatment data for one user 
     mapsShown		=		0,
+
+    treatmentDataTitles	= [],
 
     fldCorrectCount =    null,
     fldMistakeCount =    null,
     fldJsonReport 	=    null;
 
+    //randomSets	=	[], // array of 2000 sets with 5 unique random integers in each, taken from the [1,69] range. The integers in each set were not sorted. https://www.random.org/
+    //treatDataKeys	= 	[]; // array of 70 treatment data set titles
+    //mapData 		= 	{}; // 70_collection_of_map_data
 
 
 function init() {
@@ -74,51 +79,41 @@ function init() {
 	report.pageInitialized = Date.now();
 };
 
-
-function projectPoint (lat, lon) {
-
-    // Albers equal-area conic projection
-
-    lat = lat * Math.PI / 180;
-    lon = lon * Math.PI / 180;
-
-    let stdParallel1 	=  38.403267 * Math.PI / 180, // 29.5
-    	stdParallel2 	=  42.327108 * Math.PI / 180, //45.5
-    	centerLat 		=  40.3651875 * Math.PI / 180, // 29.0
-    	centerLon 		= -82.5 * Math.PI / 180; //-98.6
-
-    let earthRad = 3959; // mi
-
-    // calculate projection constants
-    let n 		= (Math.sin(stdParallel1) + Math.sin(stdParallel2)) * 0.5,
-    	c 		= Math.cos(stdParallel1) ** 2 + 2 * n * Math.sin(stdParallel1),
-    	rho0 	= earthRad * Math.sqrt(c - 2 * n * Math.sin(centerLat)) / n;
-
-   	// project
-    let	rho 	= earthRad * Math.sqrt(c - 2 * n * Math.sin(lat)) / n,
-    	theta 	= n * (lon - centerLon),
-    	x 		= rho * Math.sin(theta),
-    	y 		= rho0 - rho * Math.cos(theta);
-
-    return [x, y];
-};
-
 function loadData () {
+	if (mapsToShow.length <1){
+		//load a random set of 5 out of 69 random maps from precreated dataset and add 1 map that is the same in each set (treatMapData_5_38)
+		let treatSetIndex 		= Math.floor(Math.random() * randomSets.length),
+			treatMapIdxSet 		= randomSets[treatSetIndex];
 
-	//load a random "flatData" from precreated dataset
-	let treatmentsData = Object.keys(mapData),
-		randomSample = treatmentsData[ treatmentsData.length * Math.random() << 0];
+			treatMapIdxSet.splice(Math.floor(Math.random()*4), 0, 0); // insert 0 at random position in a set of 5 maps. 0 is the index of the treatMapData_5_38 map
+			
+			// console.log(treatSetIndex);
+			// console.log(treatMapIdxSet);
+			//console.log(fulltreatMapIdxSet);
 
-	let mapToShow = mapData[randomSample],
-		flatData = mapToShow.flatData;
+		treatMapIdxSet.forEach(function(value){
+			let treatmentDataKey 	= treatDataKeys[value];
+				
 
-	uniqueNames = mapToShow.nameColors;
+			mapsToShow.push(mapData[treatmentDataKey])
+			treatmentDataTitles.push(treatmentDataKey)
+		});
+
+		report.treatMapIdxSet		= treatMapIdxSet;
+		report.treatmentDataTitles	= treatmentDataTitles;
+	}
+
+	let mapToShow	= mapsToShow[mapsShown],
+		flatData	= mapToShow.flatData;
+
+	uniqueNames 					= mapToShow.nameColors;
 	
-	roundReport.treatmentDataTitle 	= randomSample;
+	roundReport.treatmentDataTitle 	= treatmentDataTitles[mapsShown];
 	roundReport.treatmentData		= mapToShow;
 
 	return (flatData);
 };
+
 
 function draw (flatData) {
 	
@@ -259,45 +254,6 @@ function onStartClick () {
     $("#endLink").addClass("clickable");
 };
 
-function onNextClick () {
-	// update the timers
-	let currTime 		= 	Date.now();
-
-    // deactivate the break screen
-    $("#break-screen").addClass("hidden");
-    // deactivate the "next" link
-	$("#nextLink").off("click");             // just in case we interrupted the flow
-
-    // activate the "done" link
-    $("#endLink").on("click", onEndClick);
-    $("#endLink").addClass("clickable").removeClass("hidden").removeClass("unclickable");
-
-	// clean up
-    $("#mapContainer").empty();
-
-    //resset round report
-    
-    roundReport = {
-
-		clicks:             [],     	// clicks, in order they happened
-        clickNum:           0,      	// total number of clicks (for sanity checks)
-        start: 				currTime,	// when the "start/next" link was clicked
-        end:				-1,			// when the "done" link was clicked
-
-        correctCount: 0,
-        mistakeCount: 0,
-        treatmentDataTitle:  '',
-        treatmentData:		{}
-	};
-
-    // load and draw new map
-    let flatData = loadData();
-    draw(flatData);
-
-    // show the map
-    $("#mapContainer").removeClass("hidden");
-}
-
 function onEndClick () {
 	let currTime = Date.now();
 	mapsShown++
@@ -320,7 +276,7 @@ function onEndClick () {
 	//hide the map
 	$("#mapContainer").addClass("hidden");
 
-	if(mapsShown == mapsToShow){ // if it was the last map to show
+	if(mapsShown == mapsToShow.length){ // if it was the last map to show
 		// update the timer
    		report.end 			= currTime;
    		report.correctTotal = correctCount;
@@ -346,8 +302,46 @@ function onEndClick () {
     	fldMistakeCount.val(mistakeCount);
     	fldJsonReport.val(JSON.stringify(report));
 
-	}
+	}  
+};
+
+function onNextClick () {
+	// update the timers
+	let currTime =	Date.now();
+
+    // deactivate the break screen
+    $("#break-screen").addClass("hidden");
+    // deactivate the "next" link
+	$("#nextLink").off("click");             // just in case we interrupted the flow
+
+    // activate the "done" link
+    $("#endLink").on("click", onEndClick);
+    $("#endLink").addClass("clickable").removeClass("hidden").removeClass("unclickable");
+
+	// clean up
+    $("#mapContainer").empty();
+
+    //reset round report
     
+    roundReport = {
+
+		clicks:             [],     	// clicks, in order they happened
+        clickNum:           0,      	// total number of clicks (for sanity checks)
+        start: 				currTime,	// when the "start/next" link was clicked
+        end:				-1,			// when the "done" link was clicked
+
+        correctCount: 0,
+        mistakeCount: 0,
+        treatmentDataTitle:  '',
+        treatmentData:		{}
+	};
+
+    // load and draw new map
+    let flatData = loadData();
+    draw(flatData);
+
+    // show the map
+    $("#mapContainer").removeClass("hidden");
 };
 
 function onCellClick (event,d){
@@ -453,6 +447,34 @@ function checkCorrect(cell){
 	return false;	
 };
 
+function projectPoint (lat, lon) {
+
+    // Albers equal-area conic projection
+
+    lat = lat * Math.PI / 180;
+    lon = lon * Math.PI / 180;
+
+    let stdParallel1 	=  38.403267 * Math.PI / 180, // 29.5
+    	stdParallel2 	=  42.327108 * Math.PI / 180, //45.5
+    	centerLat 		=  40.3651875 * Math.PI / 180, // 29.0
+    	centerLon 		= -82.5 * Math.PI / 180; //-98.6
+
+    let earthRad = 3959; // mi
+
+    // calculate projection constants
+    let n 		= (Math.sin(stdParallel1) + Math.sin(stdParallel2)) * 0.5,
+    	c 		= Math.cos(stdParallel1) ** 2 + 2 * n * Math.sin(stdParallel1),
+    	rho0 	= earthRad * Math.sqrt(c - 2 * n * Math.sin(centerLat)) / n;
+
+   	// project
+    let	rho 	= earthRad * Math.sqrt(c - 2 * n * Math.sin(lat)) / n,
+    	theta 	= n * (lon - centerLon),
+    	x 		= rho * Math.sin(theta),
+    	y 		= rho0 - rho * Math.cos(theta);
+
+    return [x, y];
+};
+
 // /////////////// temp for debug and locat results saving ////////////
 
 function download_report() {
@@ -463,7 +485,7 @@ function download_report() {
   hiddenElement.target = '_blank';
   hiddenElement.download = 'report.js';
   hiddenElement.click();
-}
+};
 
 
 
