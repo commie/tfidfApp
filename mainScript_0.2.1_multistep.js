@@ -117,11 +117,12 @@ function loadData () {
 
 function draw (flatData) {
 	
-	let canvasWidth = 1000,
-		margin 		= 10,
-	    mapWidth 	= canvasWidth -50,//1000, magic number to adjust the size of the map so it fits within the svg canvas
-		mapHeight 	= mapWidth * heatmapSketch.aspectRatio,
-		canvasHeight = mapHeight + 50;//1000, magic number to adjust the size of the map so it fits within the svg canvas
+	let canvasWidth 	= 1000,
+		margin 			= 10,
+	    mapWidth 		= canvasWidth -50,//1000, magic number to adjust the size of the map so it fits within the svg canvas
+		mapHeight 		= mapWidth * heatmapSketch.aspectRatio,
+		canvasHeight 	= mapHeight + 50,//1000, magic number to adjust the size of the map so it fits within the svg canvas
+		symbolRadius 	= 5;
 		
 
 	let mainSvgGroup = d3.select("#mapContainer")
@@ -132,8 +133,6 @@ function draw (flatData) {
 			.append("g")
 				.attr("transform", "translate(" + margin + "," + margin + ")");
 
-
-	let symbolRadius = 5;
 		
 	let xScale = d3.scaleLinear()
 		.domain([heatmapSketch.xMin, heatmapSketch.xMax])
