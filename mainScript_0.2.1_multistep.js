@@ -1,6 +1,6 @@
 "use strict";
 
-// min / max projected coordinates of the OH outline
+// min & max projected coordinates of the OH outline
 let heatmapSketch = {
 	xMin : -124.54294774946788,   
 	xMax : 103.72491858742902,
@@ -119,9 +119,9 @@ function draw (flatData) {
 	
 	let canvasWidth = 1000,
 		margin 		= 10,
-	    mapWidth 	= canvasWidth -50,//1000,
+	    mapWidth 	= canvasWidth -50,//1000, magic number to adjust the size of the map so it fits within the svg canvas
 		mapHeight 	= mapWidth * heatmapSketch.aspectRatio,
-		canvasHeight = mapHeight + 50;//1000б,
+		canvasHeight = mapHeight + 50;//1000, magic number to adjust the size of the map so it fits within the svg canvas
 		
 
 	let mainSvgGroup = d3.select("#mapContainer")
@@ -133,9 +133,8 @@ function draw (flatData) {
 				.attr("transform", "translate(" + margin + "," + margin + ")");
 
 
-	let symbolRadius = 5,
-		symbolFill = "#f768a1";
-
+	let symbolRadius = 5;
+		
 	let xScale = d3.scaleLinear()
 		.domain([heatmapSketch.xMin, heatmapSketch.xMax])
 		.range([0, mapWidth]);
@@ -178,7 +177,7 @@ function draw (flatData) {
 		.data(flatData)
 			.enter()
 				.append("g")
-					.classed('cellG', function (d) {
+					.classed('clickable-cell-G-element', function (d) {
 
 						if (d.cellData.length) {
 							return true;
@@ -215,7 +214,7 @@ function draw (flatData) {
 		})
 	
 	 	.style("stroke-width", 0)
-	 	.style("stroke", "#f3f3f3")
+	 	.style("stroke", "#f3f3f3") // light gray color for cell stroke (grid lines on the map. not used in the latest version)
 	 	.style("fill-opacity", 0);				
 
 
@@ -290,7 +289,7 @@ function onEndClick () {
     	$("#break-screen").first().text("Thank you for participation")
 
     	// download report for test and debug
-    	download_report();
+    	//download_report();
 
 	} else{
 		
@@ -545,7 +544,7 @@ function test () {
 
     let i,
         clickIds = [],
-        cells = d3.selectAll('.cellG'),	//d3 selection for clickable cells (g elements)
+        cells = d3.selectAll('.clickable-cell-G-element'),	//d3 selection for clickable cells (g elements)
         correctCount = 0,
         mistakeCount = 0,
         clickNum = 0,
