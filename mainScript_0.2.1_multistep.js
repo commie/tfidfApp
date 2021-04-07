@@ -81,22 +81,24 @@ function init() {
 
 function loadData () {
 	if (mapsToShow.length <1){
+		
 		//load a random set of 5 out of 69 random maps from precreated dataset and add 1 map that is the same in each set (treatMapData_5_38)
+		
 		let treatSetIndex 		= Math.floor(Math.random() * randomSets.length),
 			treatMapIdxSet 		= randomSets[treatSetIndex];
 
-			treatMapIdxSet.splice(Math.floor(Math.random()*4), 0, 0); // insert 0 at random position in a set of 5 maps. 0 is the index of the treatMapData_5_38 map
-			
-			// console.log(treatSetIndex);
-			// console.log(treatMapIdxSet);
-			//console.log(fulltreatMapIdxSet);
+		treatMapIdxSet.splice(Math.floor(Math.random()*4), 0, 0); // insert 0 at random position in a set of 5 maps. 0 is the index of the treatMapData_5_38 map
+				
+		// console.log(treatSetIndex);
+		// console.log(treatMapIdxSet);
+		// console.log(fulltreatMapIdxSet);
 
 		treatMapIdxSet.forEach(function(value){
-			let treatmentDataKey 	= treatDataKeys[value];
-				
 
-			mapsToShow.push(mapData[treatmentDataKey])
-			treatmentDataTitles.push(treatmentDataKey)
+			let treatmentDataKey 	= treatDataKeys[value];
+
+			mapsToShow.push(mapData[treatmentDataKey]);
+			treatmentDataTitles.push(treatmentDataKey);
 		});
 
 		report.treatMapIdxSet		= treatMapIdxSet;
@@ -119,7 +121,7 @@ function draw (flatData) {
 	
 	let canvasWidth 	= 1000,
 		margin 			= 10,
-	    mapWidth 		= canvasWidth -50,//1000, magic number to adjust the size of the map so it fits within the svg canvas
+	    mapWidth 		= canvasWidth - 50,//1000, magic number to adjust the size of the map so it fits within the svg canvas
 		mapHeight 		= mapWidth * heatmapSketch.aspectRatio,
 		canvasHeight 	= mapHeight + 50,//1000, magic number to adjust the size of the map so it fits within the svg canvas
 		symbolRadius 	= 5;
@@ -302,8 +304,8 @@ function onEndClick () {
 	} else {
 
 		// update progress bar
-		$("#msgCurrMap").text(mapsShown);
-		$("#msgTotalMap").text(mapsToShow.length);
+		$("#msgCurrMap").text(" " + mapsShown + " ");
+		$("#msgTotalMap").text(" " + mapsToShow.length + " ");
 		
 		//show break screen
    		$("#break-screen").removeClass("hiddenFurther");
