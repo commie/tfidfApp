@@ -1,26 +1,30 @@
 .no-svg-border svg{
 	border: none;
 }
+
 #save-btn {
 	cursor: pointer;
 	display: inline-block;
 }
 
-#break-screen{
+/*#break-screen {
 	position: absolute;
     margin: 20px;
     border: black solid 3px;
     border-radius: 5px;
     padding: 10px;
     display: inline-block;
-}
+}*/
+
 /*.clickable:hover {
 	cursor: pointer;
 }*/
+
 .unclickable{
 	pointer-events: none;
 	display: none;
 }
+
 .clickable{
 	pointer-events: auto;
 	cursor: pointer;
@@ -61,4 +65,30 @@ svg {
 	background: red;
 	border-radius: 50%
 
+}
+
+.paragraph {
+	max-width: 		35pc;
+	padding-bottom: 0.7em;
+}
+
+.controls {
+	font-size: 		200%;
+}
+
+.bigWord {
+	font-size: 		200%;
+}
+
+.fakeLink {
+	box-shadow: 	0 -7px 0 pink inset;
+}
+
+.hiddenFurther {
+	display: 		none;
+}
+
+body {
+	font-family: 	sans-serif;
+	font-size: 		14;
 }

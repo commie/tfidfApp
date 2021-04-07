@@ -245,27 +245,33 @@ function onStartClick () {
     $("#mapContainer").removeClass("hidden");
 
     // deactivate the "start" link
-    $("#startLink").removeClass("clickable").addClass("unclickable");
+    $("#startLink").removeClass("clickable").addClass("unclickable");	// has a side effect of setting "display: none"
+    $("#message1").addClass("hiddenFurther");
 
     // activate the "done" link
     $("#endLink").on("click", onEndClick);
     $("#endLink").addClass("clickable");
+    $("#message2").removeClass("hiddenFurther");
 };
 
 function onEndClick () {
+	
 	let currTime = Date.now();
-	mapsShown++
+	
+	mapsShown++;
 
 	// update the timer and global scores count
 	roundReport.end	= currTime;
 	correctCount 	+= roundReport.correctCount;
 	mistakeCount 	+= roundReport.mistakeCount;
+	
 	// save round report
 	report.rounds.push(roundReport);
 
 	// deactivate the "end" link
 	$("#endLink").off("click");             // just in case we interrupted the flow
-    $("#endLink").removeClass("clickable").addClass("unclickable").addClass("hidden");
+    $("#endLink").removeClass("clickable").addClass("unclickable");
+    $("#message2").addClass("hiddenFurther");
 
     // disable event listeners on the cells
 	d3.selectAll("g").on('click', null);
@@ -275,6 +281,7 @@ function onEndClick () {
 	$("#mapContainer").addClass("hidden");
 
 	if(mapsShown == mapsToShow.length){ // if it was the last map to show
+		
 		// update the timer
    		report.end 			= currTime;
    		report.correctTotal = correctCount;
@@ -284,16 +291,22 @@ function onEndClick () {
     	fldJsonReport.val(JSON.stringify(report));
 
     	//show break screen and change text to "thank you"
-    	$("#break-screen").removeClass("hidden");
-    	$("#break-screen").first().text("Thank you for participation")
+    	$("#message3").removeClass("hiddenFurther");
+
+    	// really hide the map
+    	$("#mapContainer").addClass("hiddenFurther");
 
     	// download report for test and debug
     	//download_report();
 
-	} else{
+	} else {
+
+		// update progress bar
+		$("#msgCurrMap").text(mapsShown);
+		$("#msgTotalMap").text(mapsToShow.length);
 		
 		//show break screen
-   		$("#break-screen").removeClass("hidden");
+   		$("#break-screen").removeClass("hiddenFurther");
 
     	// update input fields
     	fldCorrectCount.val(correctCount);
@@ -308,13 +321,14 @@ function onNextClick () {
 	let currTime =	Date.now();
 
     // deactivate the break screen
-    $("#break-screen").addClass("hidden");
+    $("#break-screen").addClass("hiddenFurther");
     // deactivate the "next" link
 	$("#nextLink").off("click");             // just in case we interrupted the flow
 
     // activate the "done" link
     $("#endLink").on("click", onEndClick);
     $("#endLink").addClass("clickable").removeClass("hidden").removeClass("unclickable");
+    $("#message2").removeClass("hiddenFurther");
 
 	// clean up
     $("#mapContainer").empty();

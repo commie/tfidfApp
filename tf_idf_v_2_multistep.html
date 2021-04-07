@@ -43,16 +43,40 @@
 	<body>
 		<!-- <p id="save-btn">save</p> -->
 		
-		<div >The map below has many colored dots. Some colors are more common, others are rare.Rare colors should only appear in a "crowd" of common colors, if at all.In some places, this rule is broken. Please find these places and click on them.</div>
-        <div >The task is timed. Once you are finished, click "Done!" to save your results, then click "Submit".</div>
-        <div id="break-screen" class="hidden">
-        	<p> Good job. Press next to see the next map.</p>
-        	<p id="nextLink" class="clickable">Next</p>
+        <div class="paragraph">Below, you will see maps with many colored dots. Some colors are more common, others are rare.</div>
+        <div class="paragraph"><b>Rare colors should only appear in a "crowd" of common colors.</b></div>
+        <div class="paragraph">In some places, this rule is broken. Please find such places and click on them.</div>
+
+        <br/>
+
+        <div id="message1" class="paragraph controls" align="center">
+        	<span id="startLink" class="clickable fakeLink">Start!</span>
+        </div>
+
+        <div id="break-screen" class="paragraph hiddenFurther" align="center">
+        	<div class="paragraph">
+        		Map 
+        		<span id="msgCurrMap" class="bigWord"></span> 
+        		out of 
+        		<span id="msgTotalMap" class="bigWord"></span> 
+        		complete. Press "next" to see the next one.
+        	</div>
+        	<div class="paragraph controls">
+        		<span id="nextLink" class="clickable fakeLink">Next!</span>
+        	</div>
+        </div>
+
+        <div id="message2" class="paragraph hiddenFurther" align="center">
+        	<div class="paragraph">When you are done with this map, press "done" to proceed.</div>
+        	<div class="paragraph controls">
+        		<span id="endLink" class="fakeLink">Done!</span>
+        	</div>
+        </div>
+
+        <div id="message3" class="paragraph hiddenFurther" align="center">
+        	<div class="paragraph">Thank you! Please click the "submit" button below to turn in your results.</div>
         </div>
         
-        <p id="startLink" class="clickable">Start!</p>
-        <p id="endLink">Done!</p>
-
         <div id="mapContainer" class="hidden no-svg-border"></div>
 
 		 <!-- hidden fields -->
