@@ -253,7 +253,7 @@ function onStartClick () {
     // activate the "done" link
     $("#endLink").on("click", onEndClick);
     $("#endLink").addClass("clickable");
-    $("#message2").removeClass("hiddenFurther");
+    $("#message3").removeClass("hiddenFurther");
 };
 
 function onEndClick () {
@@ -273,7 +273,7 @@ function onEndClick () {
 	// deactivate the "end" link
 	$("#endLink").off("click");             // just in case we interrupted the flow
     $("#endLink").removeClass("clickable").addClass("unclickable");
-    $("#message2").addClass("hiddenFurther");
+    $("#message3").addClass("hiddenFurther");
 
     // disable event listeners on the cells
 	d3.selectAll("g").on('click', null);
@@ -293,7 +293,7 @@ function onEndClick () {
     	fldJsonReport.val(JSON.stringify(report));
 
     	//show break screen and change text to "thank you"
-    	$("#message3").removeClass("hiddenFurther");
+    	$("#message4").removeClass("hiddenFurther");
 
     	// really hide the map
     	$("#mapContainer").addClass("hiddenFurther");
@@ -308,7 +308,7 @@ function onEndClick () {
 		$("#msgTotalMap").text(" " + mapsToShow.length + " ");
 		
 		//show break screen
-   		$("#break-screen").removeClass("hiddenFurther");
+   		$("#message2").removeClass("hiddenFurther");
 
     	// update input fields
     	fldCorrectCount.val(correctCount);
@@ -323,14 +323,14 @@ function onNextClick () {
 	let currTime =	Date.now();
 
     // deactivate the break screen
-    $("#break-screen").addClass("hiddenFurther");
+    $("#message2").addClass("hiddenFurther");
     // deactivate the "next" link
 	$("#nextLink").off("click");             // just in case we interrupted the flow
 
     // activate the "done" link
     $("#endLink").on("click", onEndClick);
     $("#endLink").addClass("clickable").removeClass("hidden").removeClass("unclickable");
-    $("#message2").removeClass("hiddenFurther");
+    $("#message3").removeClass("hiddenFurther");
 
 	// clean up
     $("#mapContainer").empty();
