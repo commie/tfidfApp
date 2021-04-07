@@ -1,5 +1,7 @@
 "use strict";
 
+let succsessfultrials = 0;
+
 // min & max projected coordinates of the OH outline
 let heatmapSketch = {
 	xMin : -124.54294774946788,   
@@ -10,8 +12,7 @@ let heatmapSketch = {
 
 heatmapSketch.aspectRatio = (-(heatmapSketch.yMin) + heatmapSketch.yMax + 0.1) / (-(heatmapSketch.xMin) + heatmapSketch.xMax + 0.1)
 
-let treatmentSample,
-	uniqueNames = {},
+let uniqueNames = {},
 
 	report = {
 		pageInitialized:    -1,
@@ -79,6 +80,57 @@ function init() {
 	report.pageInitialized = Date.now();
 };
 
+function reInit () {
+
+    // clean up
+    $("#mapContainer").empty();
+    $("#startLink").addClass("clickable").removeClass("unclickable");
+
+    $("#endLink").off("click");             // just in case we interrupted the flow
+    $("#endLink").removeClass("clickable").addClass("unclickable");
+    $("#message1").removeClass("hiddenFurther");
+    $("#message4").addClass("hiddenFurther");
+
+    uniqueNames = {};
+
+	report = {
+		pageInitialized:    -1,
+		start: 				-1,
+		end: 				-1,
+		correctTotal: 		-1,
+		mistakeTotal: 		-1,
+		rounds: 			[] 
+	};
+
+	roundReport = {
+		clicks:             [],     // clicks, in order they happened
+        clickNum:           0,      // total number of clicks (for sanity checks)
+        start: 				-1,     // when the "start/next" link was clicked
+        end:				-1,     // when the "done" link was clicked
+
+        treatmentDataTitle:  '',
+        correctCount: 		0,
+        mistakeCount: 		0, 
+        treatmentData:		{}
+	};
+
+    correctCount 	=       0;
+    mistakeCount 	=       0;
+
+    mapsToShow		=		[]; // array holding treatment data for one user 
+    mapsShown		=		0;
+
+    treatmentDataTitles	= [];
+
+    fldCorrectCount =    null;
+    fldMistakeCount =    null;
+    fldJsonReport 	=    null;
+    // re-initialize
+    init();
+
+};
+
+
 function loadData () {
 	if (mapsToShow.length <1){
 		
@@ -86,8 +138,11 @@ function loadData () {
 		
 		let treatSetIndex 		= Math.floor(Math.random() * randomSets.length),
 			treatMapIdxSet 		= randomSets[treatSetIndex];
+			//console.log(treatSetIndex);
 
-		treatMapIdxSet.splice(Math.floor(Math.random()*4), 0, 0); // insert 0 at random position in a set of 5 maps. 0 is the index of the treatMapData_5_38 map
+		if (!treatMapIdxSet.includes(0)){
+			treatMapIdxSet.splice(Math.floor(Math.random()*4), 0, 0); // insert 0 at random position in a set of 5 maps. 0 is the index of the treatMapData_5_38 map
+		}
 				
 		// console.log(treatSetIndex);
 		// console.log(treatMapIdxSet);
@@ -244,7 +299,7 @@ function onStartClick () {
     	roundReport.start 	= 	currTime;
 
     // show the map
-    $("#mapContainer").removeClass("hidden");
+    $("#mapContainer").removeClass("hidden").removeClass("hiddenFurther");
 
     // deactivate the "start" link
     $("#startLink").removeClass("clickable").addClass("unclickable");	// has a side effect of setting "display: none"
@@ -252,7 +307,7 @@ function onStartClick () {
 
     // activate the "done" link
     $("#endLink").on("click", onEndClick);
-    $("#endLink").addClass("clickable");
+    $("#endLink").addClass("clickable").removeClass("unclickable");
     $("#message3").removeClass("hiddenFurther");
 };
 
@@ -291,6 +346,8 @@ function onEndClick () {
 
    		// update input fields
     	fldJsonReport.val(JSON.stringify(report));
+    	fldCorrectCount.val(correctCount);
+    	fldMistakeCount.val(mistakeCount);
 
     	//show break screen and change text to "thank you"
     	$("#message4").removeClass("hiddenFurther");
@@ -505,114 +562,119 @@ function download_report() {
 
 // /////////////// testing harness ////////////////////////////////////
 
-function batchTest(rounds) {
+function batchTest(trials) {
 
-    let runs = rounds,
+    let runs = trials,
         i;
 
     for (i = 0; i < runs; i++) {
 
         // run test
         test();
+        succsessfultrials++
 
         // re-initialize
         reInit();
     }
 
-    console.log("batch test complete");
+    console.log(succsessfultrials + " batch tests complete");
 
 };
 
 
-function reInit () {
+function tryClickNext () {
+	const el = $('#message2');
 
-    // clean up
-    $("#mapContainer").empty();
-    $("#startLink").addClass("clickable").removeClass("unclickable");
-
-    $("#endLink").off("click");             // just in case we interrupted the flow
-    $("#endLink").removeClass("clickable").addClass("unclickable");
-
-    correctCount = 0;
-    mistakeCount = 0;
-    report = {
-
-        clicks:             [],     // clicks, in order they happened
-        clickNum:           0,      // total number of clicks (for sanity checks)
-
-        pageInitialized:    -1,     // when the page was initialized
-        startClicked:       -1,     // when the "start" link was clicked
-        endClicked:         -1,     // when the "done" link was clicked
-
-        treatmentDataTitle:  '',
-        treatmentData:		{}
-
-    };
-
-    // re-initialize
-    init();
-
+	if (el.css('display') != 'none') {
+		$("#nextLink").click();
+	} else {
+		setTimeout(tryClickNext, 300); // try again in 300 milliseconds
+	}
 };
-
 
 function test () {
 
-    let i,
-        clickIds = [],
-        cells = d3.selectAll('.clickable-cell-G-element'),	//d3 selection for clickable cells (g elements)
-        correctCount = 0,
-        mistakeCount = 0,
-        clickNum = 0,
-        testClicks = [];
+	let rounds 			= [],
+		trialStarted 	= -1,
+		trialEnded 		= -1,
+		totalTestCorrectCount = 0,
+		totalTestMistakeCount =	0;
 
-    // generate a list of 25 random numbers for the range of clickable cells
-    for (i = 0; i < 25; i++) {
-        clickIds.push(Math.floor(Math.random() * cells._groups[0].length));
-    }
+	//go through all maps
+	for (let round = 0; round < mapsToShow.length; round++){
 
-    // show the map
-    let testStarted = Date.now();
-    $("#startLink").click();
+		let i,
+			testRoundReport = {
+				roundStart			: -1,
+				roundEnd			: -1,
+		        roundCorrectCount	: 0,
+		        roundMistakeCount	: 0,
+		        clickNum			: 0,
+		        testClicks			: []
+			},
 
-	// click the words
-	clickIds.forEach(function (clickId) {
-
-	    // save the date
-	    let clickTime = Date.now();
-
-	    // click the cell
-	    let cell = d3.select(cells._groups[0][clickId]);
-	        //word = wordSpan.attr("id");
-
-	    cell.dispatch('click');
-
-	    // record other parameters
-	    
-	    let correct = checkCorrect(cell),           // "true" if cell with high tfidf (>0.8)
-	        selected = cell.datum().selected;    	// the logic is opposite, as we are testing after the class has been updated by the click handler
-	    
-	    if (correct) {
-
-	        // user correctly identified a wrong word
-	        if (selected) {
-	            correctCount++;
-	        } else {
-	            correctCount--;
-	        }
-
-	    } else {
-
-	        // user clicked on a fruit by mistake
-	        if (selected) {
-	            mistakeCount++;
-	        } else {
-	            mistakeCount--;
-	        }
+			clickIds	= [],
+		    cells		= d3.selectAll('.clickable-cell-G-element');	//d3 selection for clickable cells (g elements)
+		        
+        // generate a list of 25 random numbers for the range of clickable cells
+	    for (i = 0; i < 25; i++) {
+	        clickIds.push(Math.floor(Math.random() * cells._groups[0].length));
 	    }
 
-	        clickNum++;
+	    // show the map if it is the 1st round
+	    if (mapsShown == 0){
+			trialStarted = Date.now();		
+			$("#startLink").click();
+	    }
 
-	        testClicks.push({
+	    //log round start time
+	    testRoundReport.roundStart = Date.now();
+
+	    // click the cells
+		clickIds.forEach(function (clickId) {
+
+		    // save the date
+		    let clickTime = Date.now();
+
+		    // click the cell
+		    let cell = d3.select(cells._groups[0][clickId]);
+		        //word = wordSpan.attr("id");
+
+		    cell.dispatch('click');
+
+		    // record other parameters
+		    
+		    let correct = checkCorrect(cell),           // "true" if cell with high tfidf (>0.8)
+		        selected = cell.datum().selected;    	// the logic is opposite, as we are testing after the class has been updated by the click handler
+		    
+		    if (correct) {
+
+		        // user correctly identified a cell
+		        if (selected) {
+		            testRoundReport.roundCorrectCount++;
+		            totalTestCorrectCount++;
+		        } else {
+		            testRoundReport.roundCorrectCount--;
+		            totalTestCorrectCount--;
+		        }
+
+		    } else {
+
+		        // user clicked on a fruit by mistake
+		        if (selected) {
+		            testRoundReport.roundMistakeCount++;
+		            totalTestMistakeCount++;
+		        } else {
+		            testRoundReport.roundMistakeCount--;
+		            totalTestMistakeCount--;
+		        }
+		    }
+
+		    testRoundReport.clickNum++;
+		    // totalTestCorrectCount += testRoundReport.roundCorrectCount;
+		    // totalTestMistakeCount += testRoundReport.roundMistakeCount;
+
+	        testRoundReport.testClicks.push({
 	            time:   	clickTime,
 	            celID: 		cell.attr('id'),
 	            corr:   	correct,
@@ -623,95 +685,131 @@ function test () {
 
 	    });
 
-        // end the test
-        let testEnded = Date.now();
-        $("#endLink").click();
+	    //end round
+	    $("#endLink").click();
+	    testRoundReport.roundEnd = Date.now();
+	    rounds.push(testRoundReport);
+	    
+
+	    // end the trial if it was the last round
+	    if (mapsShown == 6){
+	    	trialEnded = Date.now();
+
+	    	//console.log('trial ended, comparing');
+	    } else{
+	    	tryClickNext ();
+	    }
+	   
+	 
+	}
+
+    
+    //
+    // do the comparisons
+    //
+
+    let report = JSON.parse($("#fldJsonReport").val());
+
+    
+    rounds.forEach(function(roundReport,idx){
+    	let roundIndex = idx;
+    	//console.log('comparing round ' + roundIndex);
+    	// round click num
+    	if (roundReport.clickNum !== report.rounds[roundIndex].clickNum) {
+        console.log("bad round clickNum");
+    	} else {
+        //console.log("ok clickNum");
+    	}
+
+    	// round correct count 
+	    if (roundReport.roundCorrectCount !== report.rounds[roundIndex].correctCount) {
+	        console.log("bad round correctCount " + report.rounds[roundIndex].correctCount + " " + roundReport.roundCorrectCount);
+	    } else {
+	       // console.log("ok correctCount");
+	    }
+
+	     //round  mistake count
+	    if (roundReport.roundMistakeCount !== report.rounds[roundIndex].mistakeCount) {
+	        console.log("bad round mistakeCount " + report.rounds[roundIndex].mistakeCount + " " + roundReport.roundMistakeCount);
+	    } else {
+	        //console.log("ok mistakeCount");
+	    }
+
+	    //compare round clicks
+    	roundReport.testClicks.forEach(function (click, idx) {
+     		let clickIndex = idx,
+				reportClick = report.rounds[roundIndex].clicks[clickIndex];
+
+	        if (click.celID !== reportClick.cellID) {
+	            console.log("bad cell ID");
+	            // console.log(click.cellID);
+	            // console.log(reportClick.cellID);
+	          
+	        } else {
+	            // console.log("ok cell ID");
+	        }
+
+	        if (click.corr !== reportClick.corr) {
+	            console.log("bad corr");
+	        } else {
+	            // console.log("ok corr");
+	        }
+
+	        // if (click.idx !== reportClick.idx) {
+	        //     console.log("bad idx");
+	        // } else {
+	        //     // console.log("ok idx");
+	        // }
+
+	        if (click.pos !== reportClick.pos) {
+	            console.log("bad position");
+	        } else {
+	            // console.log("ok top");
+	        }
+
+	        if (click.cellLeft !== reportClick.cellLeft) {
+	            console.log("bad left");
+	        } else {
+	            // console.log("ok left");
+	        }
+
+	        if (click.cellTop !== reportClick.cellTop) {
+	            console.log("bad top");
+	        } else {
+	            // console.log("ok top");
+	        }
+
+	        //console.log("click time diff " + (reportClick.time - click.time));
+
+    	});
+
+    });
 
 
-        //
-        // do the comparisons
-        //
 
-        let report = JSON.parse($("#fldJsonReport").val());
+    // total correct count
+    if (totalTestCorrectCount !== parseInt($("#fldCorrectCount").val())) {
+	        console.log("bad total correctCount " + $("#fldCorrectCount").val() + " " + totalTestCorrectCount);
+    } else {
+       // console.log("ok correctCount " + $("#fldCorrectCount").val() + " " + totalTestCorrectCount);
+    }
+    
+    //total  mistake count
+    if (totalTestMistakeCount !== parseInt($("#fldMistakeCount").val())) {
+        console.log("bad total mistakeCount " + $("#fldMistakeCount").val() + " " + totalTestMistakeCount);
+    } else {
+        //console.log("ok mistakeCount");
+    }
 
-        // click num
-        if (clickNum !== report.clickNum) {
-            console.log("bad clickNum");
-        } else {
-            console.log("ok clickNum");
-        }
-
-        // correct count
-        if (correctCount !== parseInt($("#fldCorrectCount").val())) {
-            console.log("bad correctCount " + $("#fldCorrectCount").val() + " " + correctCount);
-        } else {
-            console.log("ok correctCount");
-        }
-
-        // mistake count
-        if (mistakeCount !== parseInt($("#fldMistakeCount").val())) {
-            console.log("bad mistakeCount " + $("#fldMistakeCount").val() + " " + mistakeCount);
-        } else {
-            console.log("ok mistakeCount");
-        }
-
-        // clicks
-        testClicks.forEach(function (click, idx) {
-
-            // console.log(" ");
-
-            let reportClick = report.clicks[idx];
-
-            if (click.celID !== reportClick.cellID) {
-                console.log("bad cell ID");
-                // console.log(click.cellID);
-                // console.log(reportClick.cellID);
-              
-            } else {
-                // console.log("ok word");
-            }
-
-            if (click.corr !== reportClick.corr) {
-                console.log("bad corr");
-            } else {
-                // console.log("ok corr");
-            }
-
-            // if (click.idx !== reportClick.idx) {
-            //     console.log("bad idx");
-            // } else {
-            //     // console.log("ok idx");
-            // }
-
-            if (click.pos !== reportClick.pos) {
-                console.log("bad position");
-            } else {
-                // console.log("ok top");
-            }
-
-            if (click.cellLeft !== reportClick.cellLeft) {
-                console.log("bad left");
-            } else {
-                // console.log("ok left");
-            }
-
-            if (click.cellTop !== reportClick.cellTop) {
-                console.log("bad top");
-            } else {
-                // console.log("ok top");
-            }
-
-            console.log("click time diff " + (reportClick.time - click.time));
-
-        });
+    
     // console.log(" ");
 
     // timers
-    console.log("start diff " + (report.startClicked - testStarted));
-    console.log("end diff " + (report.endClicked - testEnded));
+    //console.log("start diff " + (report.start - trialStarted));
+    //console.log("end diff " + (report.end - trialEnded));
 
-    console.log("end of test");
-    console.log(" ");
+    //console.log("end of trial " + succsessfultrials);
+    //console.log(" ");
 
 };
 
