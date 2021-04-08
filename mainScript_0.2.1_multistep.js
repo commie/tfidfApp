@@ -20,7 +20,9 @@ let uniqueNames = {},
 		end: 				-1,
 		correctTotal: 		-1,
 		mistakeTotal: 		-1,
-		rounds: 			[] 
+		rounds: 			[],
+		treatMapIdxSet: 	[],
+		treatmentDataTitles:[] 
 	},
 
 	roundReport = {
@@ -145,7 +147,7 @@ function loadData () {
 		if (!treatMapIdxSet.includes(0)){
 			treatMapIdxSet.splice(Math.floor(Math.random()*4), 0, 0); // insert 0 at random position in a set of 5 maps. 0 is the index of the treatMapData_5_38 map
 		}
-				
+			
 		// console.log(treatSetIndex);
 		// console.log(treatMapIdxSet);
 		// console.log(fulltreatMapIdxSet);
