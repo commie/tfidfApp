@@ -26,8 +26,8 @@ function init() {
 	heatmapSketch.binStep = binStep;
 
 	// Load data and show 1st map
-	loadRecord (currentUser);
-	
+	//loadRecord (currentUser);
+	view();
 	
 	//let flatData = loadData();
 	//draw(flatData);
@@ -41,21 +41,24 @@ function init() {
 
 function view(){
 
-	let totalCorrect = record.correctTotal,
+	let record = records[0],
+		totalCorrect = record.correctTotal,
 		totalMistake = record.mistakeTotal;
 
 	//load round one data
 	let currentRoundData	= record.rounds[currentRound],
-		flatData			= currentRoundData.treatmentData.flatData,
+		//flatData			= currentRoundData.treatmentData.flatData,
+		flatData 			= mapData[currentRoundData.treatmentDataTitle].flatData,
 		treatmentTitle 		= currentRoundData.treatmentDataTitle,
 		correctCount 		= currentRoundData.correctCount,
 		mistakeCount 		= currentRoundData.mistakeCount;
 
 	//update the list of names and their colors	to current round data
-	uniqueNames 	= currentRoundData.treatmentData.nameColors;
+	uniqueNames 	= mapData[currentRoundData.treatmentDataTitle].nameColors;//currentRoundData.treatmentData.nameColors;
 
 	//draw current round map
 	draw(flatData);
+	imitateClicks(currentRoundData.clicks);
 
 	//show the map
     $("#mapContainer").removeClass("hidden");
@@ -115,7 +118,7 @@ function projectPoint (lat, lon) {
 
 function loadRecord (userid) {
 
-	let treatmentPath = 'records/' + userid + '.js';
+	let treatmentPath = 'real_records/' + userid + '.js';
 
 	console.log("loading file from " + treatmentPath)
 
@@ -126,7 +129,6 @@ function loadRecord (userid) {
 	//document.head.insertBefore(rawdata, head.firstElementChild);
 	rawdata.addEventListener("load", view, false);
 }
-
 
 function draw (flatData) {
 	let canvasWidth = 1000,
@@ -205,7 +207,7 @@ function draw (flatData) {
 					                    return attrValue;   
 					                })
 					.attr("id", function(d,i) { return i; })
-					// .on("click", onCellClick);
+					.on("click", onCellClick);
 
 
 	// //cells	
@@ -217,14 +219,14 @@ function draw (flatData) {
 	 	.attr("height", xScale(heatmapSketch.xMin + heatmapSketch.binStep) - xScale(heatmapSketch.xMin))
 
 	 	.classed("cell", true)
-		// .classed("clickable", function (d) {
+		.classed("clickable", function (d) {
 
-		// 	if (d.cellData.length) {
-		// 		return true;
-		// 	}
+			if (d.cellData.length) {
+				return true;
+			}
 
-		// 	return false;
-		// })
+			return false;
+		})
 		// highlight high TFIDF
 		.classed("highTFIDF", function (d) {
 
@@ -289,6 +291,20 @@ function draw (flatData) {
 	//  	.data(function(d){return d.cellData;})
 };
 
+function imitateClicks(clicks){
+
+	clicks.forEach(function(click){
+
+		let cells 		= d3.selectAll('.cellG'),
+			targetCell 	= d3.select(cells._groups[0][click.cellID]);
+
+		//console.log(click.cellID);
+
+		targetCell.dispatch('click');
+
+	});
+}
+
 // function onStartClick () {
 // 	// update the timers
 // 	let currTime 		= 	Date.now();
@@ -326,48 +342,48 @@ function onNextUserClick () {
 
 }
 
-function onEndClick () {
-	let currTime = Date.now();
-	mapsShown++
+// function onEndClick () {
+// 	let currTime = Date.now();
+// 	mapsShown++
 
-	// update the timer
-	roundReport.end = currTime;
-	// save round report
-	report.rounds.push(roundReport);
+// 	// update the timer
+// 	roundReport.end = currTime;
+// 	// save round report
+// 	report.rounds.push(roundReport);
 
-	// deactivate the "end" link
-	$("#endLink").off("click");             // just in case we interrupted the flow
-    $("#endLink").removeClass("clickable").addClass("unclickable").addClass("hidden");
+// 	// deactivate the "end" link
+// 	$("#endLink").off("click");             // just in case we interrupted the flow
+//     $("#endLink").removeClass("clickable").addClass("unclickable").addClass("hidden");
 
-    // disable event listeners on the cells
-	d3.selectAll("g").on('click', null);
-	d3.selectAll("rect").classed('clickable', false);
+//     // disable event listeners on the cells
+// 	d3.selectAll("g").on('click', null);
+// 	d3.selectAll("rect").classed('clickable', false);
 
-	//hide the map
-	$("#mapContainer").addClass("hidden");
+// 	//hide the map
+// 	$("#mapContainer").addClass("hidden");
 
-	if(mapsShown == mapsToShow){ // if it was the last map to show
-		// update the timer
-   		report.end = currTime;
+// 	if(mapsShown == mapsToShow){ // if it was the last map to show
+// 		// update the timer
+//    		report.end = currTime;
 
-   		// update input fields
-    	fldJsonReport.val(JSON.stringify(report));
+//    		// update input fields
+//     	fldJsonReport.val(JSON.stringify(report));
 
-    	//show break screen and change text to "thank you"
-    	$("#break-screen").removeClass("hidden");
-    	$("#break-screen").first().text("Thank you for participation")
+//     	//show break screen and change text to "thank you"
+//     	$("#break-screen").removeClass("hidden");
+//     	$("#break-screen").first().text("Thank you for participation")
 
-	} else{
+// 	} else{
 		
-		//show break screen
-   		$("#break-screen").removeClass("hidden");
+// 		//show break screen
+//    		$("#break-screen").removeClass("hidden");
 
-    	// update input fields
-    	fldJsonReport.val(JSON.stringify(report));
+//     	// update input fields
+//     	fldJsonReport.val(JSON.stringify(report));
 
-	}
+// 	}
     
-};
+// };
 
 function onCellClick (event,d){
 
@@ -383,14 +399,14 @@ function onCellClick (event,d){
 
 		cell.select('.marker').remove();
 
-		if (correct){
+		// if (correct){
 
-			correctCount--;
+		// 	correctCount--;
 
-		} else {
+		// } else {
 
-			mistakeCount--;
-		}
+		// 	mistakeCount--;
+		// }
 
 	} else {
 
@@ -403,51 +419,52 @@ function onCellClick (event,d){
 			.attr("width", (heatmapSketch.xScale(heatmapSketch.xMin + heatmapSketch.binStep) - heatmapSketch.xScale(heatmapSketch.xMin)) )
 			.attr("height", (heatmapSketch.xScale(heatmapSketch.xMin + heatmapSketch.binStep) - heatmapSketch.xScale(heatmapSketch.xMin)) )
 			.style("fill", "#dfdfdf")
-			.style("fill-opacity", 0.6)
+			.style("fill-opacity", 0)
 			.classed("marker", true)
+			.classed("user-selected",true)
 			// .append("text")
 			// 	.attr("x", 50)
 			// 	.attr("y",50)
 			// 	.text( function (d) { return d.selected; })	
 
-		if (correct){
+		// if (correct){
 
-			correctCount++;
+		// 	correctCount++;
 
-		} else {
+		// } else {
 
-			mistakeCount++;
-		}
+		// 	mistakeCount++;
+		// }
 	}
 
 	
 
     // form the "click" object
-    let click = {
-        time:		timestamp,
-        cellID:		cell.attr("id"),
-        corr:		correct,
-        pos:		cell.attr("transform"),
-        cellTop:	$('#' + cell.attr("id") ).position().top,	// Y coordinate of the top left corner of the cell relative to the screen
-        cellLeft:	$('#' + cell.attr("id") ).position().left,	// X coordinate of the top left corner of the cell relative to the screen
-        locCurX:	d3.pointer(event,this)[0], 	//click coordinate X relative to the cell
-        locCurY:	d3.pointer(event,this)[1], 	//click coordinate Y relative to the cell
-        globCurX:	event.pageX,				//click coordinate X relative to the screen
-        globCurY:	event.pageY					//click coordinate Y relative to the screen
-    };
+    // let click = {
+    //     time:		timestamp,
+    //     cellID:		cell.attr("id"),
+    //     corr:		correct,
+    //     pos:		cell.attr("transform"),
+    //     cellTop:	$('#' + cell.attr("id") ).position().top,	// Y coordinate of the top left corner of the cell relative to the screen
+    //     cellLeft:	$('#' + cell.attr("id") ).position().left,	// X coordinate of the top left corner of the cell relative to the screen
+    //     locCurX:	d3.pointer(event,this)[0], 	//click coordinate X relative to the cell
+    //     locCurY:	d3.pointer(event,this)[1], 	//click coordinate Y relative to the cell
+    //     globCurX:	event.pageX,				//click coordinate X relative to the screen
+    //     globCurY:	event.pageY					//click coordinate Y relative to the screen
+    // };
 
-    //console.log(click.cellTop + '  '+ click.cellLeft);
+    // //console.log(click.cellTop + '  '+ click.cellLeft);
 
-    roundReport.clicks.push(click);
+    // roundReport.clicks.push(click);
 
-    // update counters
+    // // update counters
 
-    roundReport.clickNum++; 
+    // roundReport.clickNum++; 
 
-    // update input fields
-    fldCorrectCount.val(correctCount);
-    fldMistakeCount.val(mistakeCount);
-    fldJsonReport.val(JSON.stringify(report));
+    // // update input fields
+    // fldCorrectCount.val(correctCount);
+    // fldMistakeCount.val(mistakeCount);
+    // fldJsonReport.val(JSON.stringify(report));
 	//console.log(d3.select(this).datum().tf);
 	//console.log(d3.select(this).datum().tfidf);
 
@@ -473,6 +490,93 @@ function checkCorrect(cell){
 	return false;	
 };
 
+
+function exportPlotData (){
+	
+	let viewedMaps;
+		
+
+	//iterate the array of records
+	records.forEach(function(report,reportIdx){
+		
+		if(report.rounds){
+
+			viewedMaps = {}; // resetting selected cells between users
+
+			//go through each round, imitate clicks and count correct/incorrect cells
+			report.rounds.forEach(function(round){
+
+				let clickedCells = {};
+				viewedMaps[round.treatmentDataTitle] = clickedCells;
+				
+				//for each map record which cells remained selected
+				round.clicks.forEach(function(click){
+
+					if (clickedCells[click.cellID]){
+
+						clickedCells[click.cellID] = !clickedCells[click.cellID]; 
+
+					} else {
+
+						clickedCells[click.cellID] = true;
+
+					}
+
+				});
+
+			});
+
+			let selectedScores = [],
+				notSelectedScores = [];
+
+			//for each map print highest TFIDF for selected sells
+			for(let mapKey in viewedMaps){
+
+				let map = mapData[mapKey],
+					selectedCells = viewedMaps[mapKey];
+
+				map.flatData.forEach(function(cell,idx){
+					if (cell.cellData.length){
+
+						let maxScore = -Infinity;
+
+						for (let name in cell.tfidf){
+							if (cell.tfidf[name] > maxScore){
+								maxScore = cell.tfidf[name];
+							}
+						}
+
+						if (selectedCells[idx]){
+
+							//dump selected cell TFIDF
+							selectedScores.push(maxScore);
+
+						} else {
+
+							//dump not selected cell TFIDF
+							notSelectedScores.push(maxScore);
+						}
+
+					}
+				});
+			}
+
+			// console.log('selected from report #' + reportIdx );
+			// selectedScores.forEach(function(score){
+			// 	console.log(score);
+			// });
+
+			// console.log('');
+
+			console.log('not selected from report #' + reportIdx );
+			notSelectedScores.forEach(function(score){
+				console.log(score);
+			});
+
+		}
+		
+	});
+}
 
 
 
