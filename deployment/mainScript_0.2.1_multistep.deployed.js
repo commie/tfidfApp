@@ -132,12 +132,12 @@ function reInit () {
 
 
 function loadData () {
-	if (mapsToShow.length <1){
+	if (mapsToShow.length < 1) {
 		
 		//load a random set of 5 out of 69 random maps from precreated dataset and add 1 map that is the same in each set (treatMapData_5_38)
 		
-		let treatSetIndex 		= Math.floor(Math.random() * randomSets.length);
-		// let treatSetIndex 		= parseInt(${participantId});	// this grabs data from the AMT participant sheet
+		// let treatSetIndex 		= Math.floor(Math.random() * randomSets.length);
+		let treatSetIndex 		= parseInt(${participantId});	// this grabs data from the AMT participant sheet
 
 		let	treatMapIdxSet 		= randomSets[treatSetIndex];
 			//console.log(treatSetIndex);
@@ -323,10 +323,10 @@ function onEndClick () {
 	roundReport.end	= currTime;
 	correctCount 	+= roundReport.correctCount;
 	mistakeCount 	+= roundReport.mistakeCount;
-	
+
 	// drop treatment data to avoid having a giant report
 	roundReport.treatmentData = "";
-
+	
 	// save round report
 	report.rounds.push(roundReport);
 
