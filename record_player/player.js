@@ -12,7 +12,7 @@ heatmapSketch.aspectRatio = (-(heatmapSketch.yMin) + heatmapSketch.yMax + 0.1) /
 let treatmentSample,
 	uniqueNames		= {},
 	currentRound 	= 0,
-	currentUser		= 1,
+	currentUser		= 0,
 	record 			= null;
 
 
@@ -41,9 +41,11 @@ function init() {
 
 function view(){
 
-	let record = records[0],
+	let record = records[currentUser],
 		totalCorrect = record.correctTotal,
 		totalMistake = record.mistakeTotal;
+
+
 
 	//load round one data
 	let currentRoundData	= record.rounds[currentRound],
@@ -52,7 +54,8 @@ function view(){
 		treatmentTitle 		= currentRoundData.treatmentDataTitle,
 		correctCount 		= currentRoundData.correctCount,
 		mistakeCount 		= currentRoundData.mistakeCount;
-
+	console.log(treatmentTitle);
+	console.log(currentRoundData.clicks)
 	//update the list of names and their colors	to current round data
 	uniqueNames 	= mapData[currentRoundData.treatmentDataTitle].nameColors;//currentRoundData.treatmentData.nameColors;
 
@@ -295,8 +298,9 @@ function imitateClicks(clicks){
 
 	clicks.forEach(function(click){
 
-		let cells 		= d3.selectAll('.cellG'),
-			targetCell 	= d3.select(cells._groups[0][click.cellID]);
+		let cells 		= d3.selectAll('g'),
+			cellID 		= parseInt(click.cellID),
+			targetCell 	= d3.select(cells._groups[0][1+cellID]);
 
 		//console.log(click.cellID);
 
@@ -338,7 +342,7 @@ function onNextUserClick () {
 	// clean up
     $("#mapContainer").empty();
 
-    loadRecord (currentUser);
+    view();
 
 }
 
