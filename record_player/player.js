@@ -579,6 +579,118 @@ function exportPlotData (){
 }
 
 
+function exportPlotDataPerMap (){
+	
+	let viewedMaps,
+		exportString = "";
+		
+
+	//iterate the array of records
+	records.forEach(function(report,reportIdx){
+		
+		if(report.rounds){
+
+			viewedMaps = {}; // resetting selected cells between users
+
+			//go through each round, imitate clicks and count correct/incorrect cells
+			report.rounds.forEach(function(round){
+
+				let clickedCells = {};
+				viewedMaps[round.treatmentDataTitle] = clickedCells;
+				
+				//for each map, record which cells remained selected
+				round.clicks.forEach(function(click){
+
+					if (clickedCells[click.cellID]){
+
+						clickedCells[click.cellID] = !clickedCells[click.cellID]; 
+
+					} else {
+
+						clickedCells[click.cellID] = true;
+
+					}
+
+				});
+
+			});
+
+			let selectedScores = [],
+				notSelectedScores = [],
+				mapNum = 0;
+
+			//for each map print highest TFIDF for selected sells
+			for (let mapKey in viewedMaps) {
+
+				let map 			= mapData[mapKey],
+					selectedCells 	= viewedMaps[mapKey];
+
+				map.flatData.forEach(function(cell,idx){
+					if (cell.cellData.length){
+
+						let maxScore = -Infinity;
+
+						for (let name in cell.tfidf){
+							if (cell.tfidf[name] > maxScore){
+								maxScore = cell.tfidf[name];
+							}
+						}
+
+						if (selectedCells[idx]){
+
+							//dump selected cell TFIDF
+							selectedScores.push(maxScore);
+
+						} else {
+
+							//dump not selected cell TFIDF
+							notSelectedScores.push(maxScore);
+						}
+
+					}
+				});
+
+				// print on a per-map, per-participant basis
+
+				selectedScores.forEach(function(score){
+					// console.log(reportIdx + "," + mapNum + "," + "1" + "," + score);
+					exportString += reportIdx + "," + mapNum + "," + "1" + "," + score + "|";
+				});
+
+				notSelectedScores.forEach(function(score){
+					// console.log(reportIdx + "," + mapNum + "," + "0" + "," + score);
+					exportString += reportIdx + "," + mapNum + "," + "0" + "," + score + "|";
+				});
+
+				// reset selected scores between maps
+				selectedScores 		= [];
+				notSelectedScores 	= [];
+
+				mapNum++;
+
+			}
+
+			// console.log('selected from report #' + reportIdx );
+			// selectedScores.forEach(function(score){
+			// 	console.log(score);
+			// });
+
+			// console.log('');
+
+			// console.log('not selected from report #' + reportIdx );
+			// notSelectedScores.forEach(function(score){
+			// 	console.log(score);
+			// });
+
+		}
+		
+		// end of records.forEach()
+	});
+
+	console.log(exportString);
+}
+
+
 
 
 
