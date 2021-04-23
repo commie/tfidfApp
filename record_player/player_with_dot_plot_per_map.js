@@ -614,10 +614,11 @@ function exportPlotDataPerMap (){
 				if (viewedMaps[round.treatmentDataTitle] == undefined){
 					let clickedCells = {};
 					viewedMaps[round.treatmentDataTitle] = clickedCells;
-					mapViewCounter[round.treatmentDataTitle] = 1;
+					mapViewCounter[round.treatmentDataTitle] = {};
+					mapViewCounter[round.treatmentDataTitle].views = 1;
 				}
 				
-				mapViewCounter[round.treatmentDataTitle] ++;
+				mapViewCounter[round.treatmentDataTitle].views ++;
 				let currentClickedCells ={};
 
 
@@ -693,7 +694,7 @@ function exportPlotDataPerMap (){
 		
 		// end of records.forEach()
 	});
-	console.log(commonMapClickCounter);
+	//console.log(commonMapClickCounter);
 
 	for (let cellID in commonMapClickCounter){
 
@@ -760,7 +761,10 @@ function exportPlotDataPerMap (){
 			}
 		});
 
-		drawScatterplot(selectedScores,notSelectedScores,mapKey, mapViewCounter[mapKey]);
+		mapViewCounter[mapKey].selected 		= selectedScores;
+		mapViewCounter[mapKey].notSelected  	= notSelectedScores;
+
+		//drawScatterplot(selectedScores,notSelectedScores,mapKey, mapViewCounter[mapKey]);
 		
 		// reset selected scores between maps
 		selectedScores 		= [];
@@ -770,13 +774,17 @@ function exportPlotDataPerMap (){
 	}
 
 	//console.log(exportString);
+	drawScatterplot(mapViewCounter);
 }
 
 
-function drawScatterplot(selected, notselected, mapName, viewCount){
+function drawScatterplot(mapViewCounter){
 
-	if( $("#my_dataviz").children().length < 70){
-	// set the dimensions and margins of the graph
+	let sortedKeys = Object.entries(mapViewCounter).sort((a,b)=>b[1].views-a[1].views).map(el=>el[0]);
+	//console.log(sortedKeys);
+
+	sortedKeys.forEach(function(mapTitle){
+		// set the dimensions and margins of the graph
 	let margin = {top: 10, right: 30, bottom: 30, left: 60},
 	    width = 460 - margin.left - margin.right,
 	    height = 400 - margin.top - margin.bottom;
@@ -809,7 +817,7 @@ function drawScatterplot(selected, notselected, mapName, viewCount){
 	// Add selected dots
 	svg.append('g')
 	.selectAll("dot")
-	.data(selected)
+	.data(mapViewCounter[mapTitle].selected)
 	.enter()
 	.append("circle")
 	  // .attr("cx", function (d) { return x(d.Correct); } )
@@ -821,7 +829,7 @@ function drawScatterplot(selected, notselected, mapName, viewCount){
 	// Add not selected dots  
 	svg.append('g')
 	.selectAll("dot")
-	.data(notselected)
+	.data(mapViewCounter[mapTitle].notSelected)
 	.enter()
 	.append("circle")
 	  // .attr("cx", function (d) { return x(d.Correct); } )
@@ -836,65 +844,68 @@ function drawScatterplot(selected, notselected, mapName, viewCount){
         .attr("y", 5)
         .attr("text-anchor", "middle")  
         .style("font-size", "16px") 
-        .text(mapName);
+        .text(mapTitle);
      //add view count
 	 svg.append("text")
         .attr("x", (width / 2))             
         .attr("y", 20)
         .attr("text-anchor", "middle")  
         .style("font-size", "16px") 
-        .text(`viewed by ${viewCount} testers`);
-	}
-	else {
-		let svg_total = d3.select("#my_dataviz_total")
-	  .append("svg")
-	    .attr("width", 1100)
-	    .attr("height", 1100)
-	  .append("g")
-	  .attr("transform",
-	          "translate(" + 30 + "," + 40 + ")");
+        .text(`viewed by ${mapViewCounter[mapTitle].views} testers`);
+	});
+	// for (let mapTitle in mapViewCounter){
+	
+	// }
+	// else {
+	// 	let svg_total = d3.select("#my_dataviz_total")
+	//   .append("svg")
+	//     .attr("width", 1100)
+	//     .attr("height", 1100)
+	//   .append("g")
+	//   .attr("transform",
+	//           "translate(" + 30 + "," + 40 + ")");
 
-	  //Add X axis
-	var x = d3.scaleLinear()
-	.domain([0, 4])
-	.range([ 0, 1000 ]);
+	//   //Add X axis
+	// var x = d3.scaleLinear()
+	// .domain([0, 4])
+	// .range([ 0, 1000 ]);
   
-	svg_total.append("g")
-	.attr("transform", "translate(0," + 1000 + ")")
-	.call(d3.axisBottom(x).tickValues([]));
+	// svg_total.append("g")
+	// .attr("transform", "translate(0," + 1000 + ")")
+	// .call(d3.axisBottom(x).tickValues([]));
 
-	// Add Y axis
-	var y = d3.scaleLinear()
-	.domain([0, 3.5])
-	.range([ 1000, 0]);
-	svg_total.append("g")
-	.call(d3.axisLeft(y));
+	// // Add Y axis
+	// var y = d3.scaleLinear()
+	// .domain([0, 3.5])
+	// .range([ 1000, 0]);
+	// svg_total.append("g")
+	// .call(d3.axisLeft(y));
 
-	// Add selected dots
-	svg_total.append('g')
-	.selectAll("dot")
-	.data(selected)
-	.enter()
-	.append("circle")
-	  // .attr("cx", function (d) { return x(d.Correct); } )
-	  .attr("cx", function(d){return x(Math.random()*0.1+0.95)})
-	  .attr("cy", function (d) { return y(d);})
-	  .attr("r", 1.5)
-	  .style("fill", "#69b3a2")
+	// // Add selected dots
+	// svg_total.append('g')
+	// .selectAll("dot")
+	// .data(selected)
+	// .enter()
+	// .append("circle")
+	//   // .attr("cx", function (d) { return x(d.Correct); } )
+	//   .attr("cx", function(d){return x(Math.random()*0.1+0.95)})
+	//   .attr("cy", function (d) { return y(d);})
+	//   .attr("r", 1.5)
+	//   .style("fill", "#69b3a2")
 
-	// Add not selected dots  
-	svg_total.append('g')
-	.selectAll("dot")
-	.data(notselected)
-	.enter()
-	.append("circle")
-	  // .attr("cx", function (d) { return x(d.Correct); } )
-	  .attr("cx", function(d){return x(Math.random()*0.1+2.95);})
-	  .attr("cy", function (d){ return y(d);})
-	  .attr("r", 1.5)
-	  .style("fill", "#f0847d")
+	// // Add not selected dots  
+	// svg_total.append('g')
+	// .selectAll("dot")
+	// .data(notselected)
+	// .enter()
+	// .append("circle")
+	//   // .attr("cx", function (d) { return x(d.Correct); } )
+	//   .attr("cx", function(d){return x(Math.random()*0.1+2.95);})
+	//   .attr("cy", function (d){ return y(d);})
+	//   .attr("r", 1.5)
+	//   .style("fill", "#f0847d")
 
-	}
+	// }
 
 }
 
