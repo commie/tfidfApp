@@ -1,0 +1,67 @@
+blob of very low incorrect plus single high correct
+9_45
+6_90
+9_50
+9_74
+9_98
+____
+blob of low incorrect and a stripe of high correct
+5_49
+11_11
+12_59
+5_38
+14_57
+11_15
+7_91
+5_82
+5_44
+5_86
+___
+incorrect higher thatn correct
+5_46
+13_25
+12_9
+5_4
+13_73
+6_51
+7_1
+8_23
+11_63
+___
+correct and incorrect about the same height
+2_24
+11_17
+9_84
+2_18
+2_31
+8_72
+14_58
+5_2
+8_10
+16_34
+8_20
+___
+a stipe/blob of incorrect lowish and a single correct high
+11_48
+13_41
+11_77
+8_32
+14_88
+12_69
+11_97
+11_14
+11_29
+12_65
+11_87
+13_27
+13_56
+___
+stripe of incorrect from low to high plus correct from low to high
+6_76
+9_39
+9_70
+2_83
+12_47
+___
+no correct answers
+7_5
