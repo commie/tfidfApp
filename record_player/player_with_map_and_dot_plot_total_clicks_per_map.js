@@ -437,7 +437,7 @@ function drawMapScatterplot(mapViewCounter){
 	// set the dimensions and margins of the graph
 	let margin = {top: 10, right: 30, bottom: 30, left: 60},
 	    width = 800 - margin.left - margin.right,
-	    height = 840 - margin.top - margin.bottom;
+	    height = 867 - margin.top - margin.bottom;
 
 	//iterate sorted list of maps and draw map and dot plot
 	sortedKeys.forEach(function(mapTitle){
@@ -550,7 +550,7 @@ function drawMapScatterplot(mapViewCounter){
 	.enter()
 	.append("circle")
 	  // .attr("cx", function (d) { return x(d.Correct); } )
-	  .attr("cx", function(d){return x(3 + jitterCoefficient(0.05, 0.5));})
+	  .attr("cx", function(d){return x(3 + jitterCoefficient(0.01, 0.5));})
 	  .attr("cy", function (d){ return y(d);})
 	  .attr("r", 3)
 	  .style("fill", "#f0847d")
