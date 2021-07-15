@@ -1,0 +1,6 @@
+1 - (2) a sub version of 4, where due to many viewers forms a shape of 2 opposite triangles - one pointing down of selected cells and pointing up of not selected cells. 2 maps with 21 and 5 viewers per map.
+2 - (13) more of a failure. missed high tfidf, hit low tfidf. maps of varying density and tfidf contrast. mostly viewed by 1 and 2 viewers.
+3 - (9) 50/50 not very successfull but not too bad. missed some high tfidf, selected some low tfidf.
+4 - (19) more of a succsess. missed a few high tfidf, hit few low tfidf.
+5 - (9) succsess. never missed high tfidf, never hit low tfidf. Includes dense and sparse maps.
+6 - (2) failure. nothing selected, or missed high tfidf, while selecting low. only 2 maps with 1 viewer per map.

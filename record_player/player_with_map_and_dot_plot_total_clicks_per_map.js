@@ -1,4 +1,4 @@
-
+ 
 
 let heatmapSketch = {
 	xMin : -124.54294774946788,   
@@ -16,6 +16,8 @@ let treatmentSample,
 	record 			= null,
     selectedDotsCoordinates = [];
 
+let element = $("#my_dataviz"), 
+	getCanvas;
 
 function init() {
 
@@ -27,12 +29,8 @@ function init() {
 	heatmapSketch.binStep = binStep;
 
 	//view();
-	plotDataPerMap();
-	
+	plotDataPerMap();	
 };
-
-
-
 
 function projectPoint (lat, lon) {
 
@@ -425,7 +423,7 @@ function plotDataPerMap (){
 		notSelectedCelsTfIdfScores 	= [];
 
 	}
-	console.log(viewedMaps);
+	//console.log(viewedMaps);
 	drawMapScatterplot(viewedMaps);
 }
 
